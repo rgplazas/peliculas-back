@@ -1,7 +1,7 @@
 
 // Importación de dependencias necesarias
 const bcrypt = require('bcrypt'); // Manejo de contraseñas (hash y comparación)
-const { createUserSchema, updateUserSchema,loginRateLimiter,validateSchema  } = require('../utils/validators'); // Validación de datos
+const { createUserSchema, updateUserSchema,loginRateLimiter, validateSchema  } = require('../utils/validators'); // Validación de datos
 const db = require('../config/database'); // Configuración de la base de datos
 const jwt = require('jsonwebtoken'); // Generación de tokens JWT
 
@@ -118,20 +118,35 @@ const deleteUser = async (req, res) => {
 // Obtención de usuarios con paginación
 const getAllUsers = async (req, res) => {
   try {
+    // Obtiene limit y page desde los parámetros de la query, con valores predeterminados
     const { limit = 10, page = 1 } = req.query;
-    const offset = (page - 1) * limit;
+    
+    // Asegura que limit y page son números enteros
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    // Calcula el offset basado en el número de página
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // Verifica si limit y page son números válidos
+    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+      return res.status(400).json({ status: 'error', message: 'Los parámetros limit y page deben ser números enteros' });
+    }
 
     // Recupera los usuarios según la paginación
     const [users] = await db.query(
-      'SELECT id, username, email, created_at FROM usuarios LIMIT ? OFFSET ?',
-      [parseInt(limit), parseInt(offset)]
+      'SELECT id, username, email FROM usuarios LIMIT ? OFFSET ?',
+      [limitNumber, offset]
     );
 
+    // Enviar la respuesta con los usuarios
     res.json({ status: 'success', data: users });
   } catch (error) {
+    // Manejo de errores
     res.status(500).json({ status: 'error', message: 'Error al obtener usuarios', error: error.message });
   }
 };
+
 
 // Obtención de un usuario por ID
 const getUserById = async (req, res) => {
@@ -140,7 +155,7 @@ const getUserById = async (req, res) => {
     
     // Busca al usuario por ID
     const [users] = await db.query(
-      'SELECT id, username, email, created_at FROM usuarios WHERE id = ?',
+      'SELECT id, username, email FROM usuarios WHERE id = ?',
       [userId]
     );
     
