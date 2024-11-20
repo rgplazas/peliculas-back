@@ -3,6 +3,84 @@
 
 ## Modulo de Gestión de Peliculas
 
+Este repositorio de PELICULAS-BACK contiene un módulo completo para la gestión de películas. Desarrollado en Node.js, incluye funcionalidades para la creación, obtención, actualización y eliminación de películas, integrando validaciones avanzadas y mejores prácticas.
+
+### **Descripción de las Funciones Principales**
+
+#### 1. **Creación de Película (`createMovie`)**
+Permite agregar una nueva película al sistema.
+- **Validación previa**: Usa un esquema Zod para validar campos como `titulo`, `director`, `anio`, y otros.
+- **Prevención de duplicados**: Verifica si una película con el mismo título ya existe (opcional según los requerimientos).
+
+##### **Ejemplo de uso:**
+```bash
+POST /movies
+Content-Type: application/json
+Authorization: 'Bearer TOKEN'
+
+{
+  "titulo": "Inception",
+  "titulo_original": "Inception",
+  "director": "Christopher Nolan",
+  "anio": 2010,
+  "sinopsis": "Una historia sobre sueños dentro de sueños.",
+  "imagen_url": "https://example.com/inception.jpg",
+  "duracion": 148,
+  "pais": "EE.UU.",
+  "trailer_url": "https://youtube.com/example",
+  "fecha_estreno": "2010-07-16",
+  "usuario_id": 1
+} 
+
+```
+
+#### 2. **Obtención de Películas (`getAllMovies`)**
+Recupera una lista de películas con soporte para paginación.
+- **Paginación**: Controlada por los parámetros limit y page.
+- **Filtros opcionales**: Se pueden aplicar filtros como director, anio, o titulo.
+
+##### **Ejemplo de uso:**
+```bash
+GET /movies?limit=5&page=2&director=Christopher%20Nolan
+```
+
+#### 3. **Obtención de Película por ID (`getMovieById`)**
+Obtiene información detallada de una película específica.
+- **Validación de existencia**: Retorna un mensaje si la película no se encuentra.
+
+##### **Ejemplo de uso:**
+```bash
+GET /movies/1
+```
+
+#### 4. **Actualización de Película (`updateMovie`)**
+Actualiza la información de una película existente.
+- **Validación dinámica**: Permite actualizar solo los campos proporcionados en la solicitud.
+- **Prevención de errores**: Asegura que la película especificada exista antes de actualizarla.
+
+##### **Ejemplo de uso:**
+```bash
+PUT /movies/1
+Content-Type: application/json
+Authorization: 'Bearer TOKEN'
+
+{
+  "titulo": "Inception (Updated)",
+  "sinopsis": "Un thriller de ciencia ficción renovado."
+}
+
+```
+
+#### 5. **Eliminación de Película (`deleteMovie`)**
+Elimina una película del sistema.
+- **Validación de existencia**: Retorna un mensaje si la película no se encuentra.
+
+##### **Ejemplo de uso:**
+```bash
+DELETE /movies/1
+Authorization: 'Bearer TOKEN'
+```
+
 ## Modulo de Gestión de Usuarios
 
 Este repositorio de PELICULAS-BACK contiene un módulo básico para la gestión de usuarios, desarrollado en Node.js. Incluye funcionalidades para registro, inicio de sesión, actualización, eliminación, y obtención de usuarios con validaciones avanzadas y mejores prácticas.
@@ -36,6 +114,7 @@ Crea un nuevo usuario en el sistema.
 ```bash
 POST /users
 Content-Type: application/json
+Authorization: 'Bearer TOKEN'
 
 {
   "username": "janedoe",
@@ -54,6 +133,7 @@ Actualiza la información de un usuario existente.
 ```bash
 PUT /users/1
 Content-Type: application/json
+Authorization: 'Bearer TOKEN'
 
 {
   "email": "new.email@example.com",
@@ -68,6 +148,7 @@ Elimina un usuario del sistema.
 ##### **Ejemplo de uso:**
 ```bash
 DELETE /users/1
+Authorization: 'Bearer TOKEN'
 ```
 
 #### 5. **Obtención de Usuarios (`getAllUsers`)**
@@ -78,6 +159,7 @@ Recupera una lista de usuarios con paginación.
 ##### **Ejemplo de uso:**
 ```bash
 GET /users?limit=5&page=2
+Authorization: 'Bearer TOKEN'
 ```
 
 #### 6. **Obtención de Usuario por ID (`getUserById`)**
@@ -87,6 +169,7 @@ Obtiene información detallada de un usuario específico.
 ##### **Ejemplo de uso:**
 ```bash
 GET /users/1
+Authorization: 'Bearer TOKEN'
 ```
 
 ---

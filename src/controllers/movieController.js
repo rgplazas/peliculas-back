@@ -1,58 +1,99 @@
 const Movie = require('../models/Movie');
+const { createMovieSchema, updateMovieSchema } = require('../utils/validators');
 
-exports.createMovie = async (req, res) => {
+/**
+ * Crea una nueva película.
+ */
+const createMovie = async (req, res) => {
   try {
-    const movieId = await Movie.create(req.body);
-    res.status(201).json({ id: movieId, message: 'Movie created successfully' });
+    const validatedData = createMovieSchema.parse(req.body);
+    const movieId = await Movie.create(validatedData);
+    res.status(201).json({ id: movieId, status: 'success', message: 'Película creada con éxito' });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating movie', error: error.message });
-  }
-};
-
-exports.getAllMovies = async (req, res) => {
-  try {
-    const movies = await Movie.findAll();
-    res.json(movies);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching movies', error: error.message });
-  }
-};
-
-exports.getMovieById = async (req, res) => {
-  try {
-    const movie = await Movie.findById(req.params.id);
-    if (movie) {
-      res.json(movie);
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ status: 'error', message: 'Datos de entrada no válidos', errors: error.errors });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching movie', error: error.message });
+    res.status(500).json({ status: 'error', message: 'Error al crear una película', error: error.message });
   }
 };
 
-exports.updateMovie = async (req, res) => {
+/**
+ * Obtiene todas las películas con paginación.
+ */
+const getAllMovies = async (req, res) => {
   try {
-    const result = await Movie.update(req.params.id, req.body);
-    if (result) {
-      res.json({ message: 'Movie updated successfully' });
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
+    const { limit = 10, page = 1 } = req.query;
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+      return res.status(400).json({ status: 'error', message: 'Limit y page deben ser números enteros' });
     }
+
+    const movies = await Movie.findAll(limitNumber, offset);
+    res.json({ status: 'success', data: movies });
   } catch (error) {
-    res.status(500).json({ message: 'Error updating movie', error: error.message });
+    res.status(500).json({ status: 'error', message: 'Error al obtener películas', error: error.message });
   }
 };
 
-exports.deleteMovie = async (req, res) => {
+/**
+ * Obtiene una película por ID.
+ */
+const getMovieById = async (req, res) => {
   try {
-    const result = await Movie.delete(req.params.id);
-    if (result) {
-      res.json({ message: 'Movie deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Movie not found' });
+    const { id } = req.params;
+    const movie = await Movie.findById(id);
+
+    if (!movie) {
+      return res.status(404).json({ status: 'error', message: 'Película no encontrada' });
     }
+
+    res.json({ status: 'success', data: movie });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting movie', error: error.message });
+    res.status(500).json({ status: 'error', message: 'Error al obtener la película', error: error.message });
   }
 };
+
+/**
+ * Actualiza una película.
+ */
+const updateMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const validatedData = updateMovieSchema.parse(req.body);
+    const result = await Movie.update(id, validatedData);
+
+    if (!result) {
+      return res.status(404).json({ status: 'error', message: 'Película no encontrada' });
+    }
+
+    res.json({ status: 'success', message: 'Película actualizada con éxito' });
+  } catch (error) {
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ status: 'error', message: 'Datos de entrada no válidos', errors: error.errors });
+    }
+    res.status(500).json({ status: 'error', message: 'Error al actualizar la película', error: error.message });
+  }
+};
+
+/**
+ * Elimina una película.
+ */
+const deleteMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await Movie.delete(id);
+
+    if (!result) {
+      return res.status(404).json({ status: 'error', message: 'Película no encontrada' });
+    }
+
+    res.json({ status: 'success', message: 'Película eliminada con éxito' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Error al eliminar la película', error: error.message });
+  }
+};
+
+module.exports = { createMovie, getAllMovies, getMovieById, updateMovie, deleteMovie };

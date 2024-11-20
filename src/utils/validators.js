@@ -17,21 +17,39 @@ const loginRateLimiter = rateLimiter({
     message: { status: 'error', message: 'Demasiados intentos de inicio de sesión. Intente más tarde.' },
   });
 
+// Esquema de validación para la creación de un usuario
 const createUserSchema = z.object({
     username: z.string().min(3, 'El nombre de usuario debe tener al menos 3 caracteres'),
     email: z.string().email('Formato de correo electrónico no válido'),
     password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
 });
 
-const updateUserSchema = z.object({
-    username: z.string().min(3).optional(),
-    email: z.string().email().optional(),
-    password: z.string().min(8).optional(),
-});
+// Esquema de validación para la actualización de un usuario
+const updateUserSchema = createUserSchema.partial(); // Todos los campos son opcionales, pero siguen las mismas validaciones
+
+// Esquema de validación para la creación de una película
+const createMovieSchema = z.object({
+    titulo: z.string().min(1, "Se requiere título"), // Título obligatorio
+    titulo_original: z.string().optional(), // Título original es opcional
+    director: z.string().min(1, "Se requiere director"), // Director obligatorio
+    anio: z.number().int().min(1900, "El año debe ser posterior a 1900").max(new Date().getFullYear(), `Year can't be in the future`), // Año debe ser un número entre 1900 y el año actual
+    sinopsis: z.string().min(10, "La sinopsis debe tener al menos 10 caracteres"), // Sinopsis debe tener al menos 10 caracteres
+    imagen_url: z.string().url("URL no válida para la imagen"), // URL de la imagen válida
+    duracion: z.number().int().positive("La duración debe ser un número positivo"), // Duración positiva en minutos
+    pais: z.string().min(1, "Se requiere el país"), // País obligatorio
+    trailer_url: z.string().url("URL no válida para el tráiler"), // URL válida para el tráiler
+    fecha_estreno: z.string().refine(date => !isNaN(Date.parse(date)), "Fecha de lanzamiento no válida"), // Fecha de estreno válida
+    usuario_id: z.number().int().positive("El ID de usuario debe ser un número positivo") // ID de usuario positivo
+  });
+  
+  // Esquema de validación para la actualización de una película
+  const updateMovieSchema = createMovieSchema.partial(); // Todos los campos son opcionales, pero siguen las mismas validaciones
 
 module.exports = {
     validateSchema,
     loginRateLimiter,
     createUserSchema,
-    updateUserSchema
+    updateUserSchema,
+    createMovieSchema,
+    updateMovieSchema
 };
