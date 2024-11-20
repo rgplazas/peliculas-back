@@ -1,4 +1,4 @@
-const Movie = require('../models/Movie');
+const Movie = require('../models/MovieModel');
 const { createMovieSchema, updateMovieSchema } = require('../utils/validators');
 
 /**

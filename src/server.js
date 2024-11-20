@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Import routes
 const themoviedbRoutes  = require('./routes/themoviedb');
-const authRoutes        = require('./routes/auth');
+const authRoutes        = require('./routes/users');
 const movieRoutes       = require('./routes/movies');
 
 // Use routes
