@@ -3,7 +3,7 @@ const db = require('../config/database');
 // Insertar una película en la base de datos
 const createMovieModel = async (movie) => {
   const query = `
-    INSERT INTO movies (
+    INSERT INTO peliculas (
       titulo, titulo_original, director, anio, sinopsis, imagen_url, duracion, 
       pais, rating_promedio, trailer_url, fecha_estreno, usuario_id
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)

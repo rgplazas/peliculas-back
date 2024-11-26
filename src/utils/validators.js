@@ -39,7 +39,7 @@ const createMovieSchema = z.object({
     pais: z.string().min(1, "Se requiere el país"), // País obligatorio
     trailer_url: z.string().url("URL no válida para el tráiler"), // URL válida para el tráiler
     fecha_estreno: z.string().refine(date => !isNaN(Date.parse(date)), "Fecha de lanzamiento no válida"), // Fecha de estreno válida
-    usuario_id: z.number().int().positive("El ID de usuario debe ser un número positivo") // ID de usuario positivo
+    usuario_id: z.number().int().positive("El ID de usuario debe ser un número positivo").min(1, "Se requiere se asocie a un usario") // ID de usuario positivo
   });
   
   // Esquema de validación para la actualización de una película
