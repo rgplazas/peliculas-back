@@ -1,4 +1,4 @@
-const Movie = require('../models/MovieModel');
+const {createMovieModel, findAllMovieModel, findMovieByFiltersModel, updateMovieModel, deleteMovieModel} = require('../models/MovieModel');
 const { createMovieSchema, updateMovieSchema } = require('../utils/validators');
 
 /**
@@ -7,7 +7,7 @@ const { createMovieSchema, updateMovieSchema } = require('../utils/validators');
 const createMovie = async (req, res) => {
   try {
     const validatedData = createMovieSchema.parse(req.body);
-    const movieId = await Movie.create(validatedData);
+    const movieId = await createMovieModel(validatedData);
     res.status(201).json({ id: movieId, status: 'success', message: 'Película creada con éxito' });
   } catch (error) {
     if (error.name === 'ZodError') {
@@ -23,15 +23,18 @@ const createMovie = async (req, res) => {
 const getAllMovies = async (req, res) => {
   try {
     const { limit = 10, page = 1 } = req.query;
-    const pageNumber = parseInt(page, 10);
-    const limitNumber = parseInt(limit, 10);
-    const offset = (pageNumber - 1) * limitNumber;
+    
+    const pagination = {
+      limit: parseInt(limit, 10),
+      page: parseInt(page, 10),
+      offset: (parseInt(page, 10) - 1) * parseInt(limit, 10),
+    }
 
-    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+    if (isNaN(pagination.page) || isNaN(pagination.limit)) {
       return res.status(400).json({ status: 'error', message: 'Limit y page deben ser números enteros' });
     }
 
-    const movies = await Movie.findAll(limitNumber, offset);
+    const movies = await findAllMovieModel(pagination);
     res.json({ status: 'success', data: movies });
   } catch (error) {
     res.status(500).json({ status: 'error', message: 'Error al obtener películas', error: error.message });
@@ -41,18 +44,36 @@ const getAllMovies = async (req, res) => {
 /**
  * Obtiene una película por ID.
  */
-const getMovieById = async (req, res) => {
+const getMovieByFilters = async (req, res) => {
   try {
-    const { id } = req.params;
-    const movie = await Movie.findById(id);
+    // Convertir los parámetros de la consulta en un objeto
+    const filters = {
+      id: req.query.id ? parseInt(req.query.id, 10) : undefined,
+      titulo: req.query.titulo,
+      titulo_original: req.query.titulo_original,
+      director: req.query.director,
+      anio: req.query.anio ? parseInt(req.query.anio, 10) : undefined,
+      sinopsis: req.query.sinopsis,
+      imagen_url: req.query.imagen_url,
+      duracion: req.query.duracion ? parseInt(req.query.duracion, 10) : undefined,
+      pais: req.query.pais,
+      rating_promedio: req.query.rating_promedio ? parseFloat(req.query.rating_promedio) : undefined,
+      trailer_url: req.query.trailer_url,
+      fecha_estreno: req.query.fecha_estreno,
+      fecha_creacion: req.query.fecha_creacion,
+      fecha_modificacion: req.query.fecha_modificacion,
+      usuario_id: req.query.usuario_id ? parseInt(req.query.usuario_id, 10) : undefined
+    };
+    
+    const movieDetails = await findMovieByFiltersModel(filters);
 
-    if (!movie) {
-      return res.status(404).json({ status: 'error', message: 'Película no encontrada' });
+    if (!movieDetails || movieDetails.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'No se encontraron películas con los filtros proporcionados' });
     }
 
-    res.json({ status: 'success', data: movie });
+    res.json({ status: 'success', data: movieDetails});
   } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Error al obtener la película', error: error.message });
+    res.status(500).json({ status: 'error', message: 'Error al buscar películas', error: error.message });
   }
 };
 
@@ -96,4 +117,4 @@ const deleteMovie = async (req, res) => {
   }
 };
 
-module.exports = { createMovie, getAllMovies, getMovieById, updateMovie, deleteMovie };
+module.exports = { createMovie, getAllMovies, getMovieByFilters, updateMovie, deleteMovie };
