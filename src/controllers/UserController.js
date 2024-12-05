@@ -89,11 +89,10 @@ const deleteUser = async (req, res) => {
 // Obtención de usuarios con paginación
 const getAllUsers = async (req, res) => {
   try {
-    const { limit = 10, page = 1 } = req.query;
-    const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    const { limit = 10, page = 1 } = req.body;
+    const offset = ((parseInt(page, 10) - 1) * parseInt(limit, 10));
     const users = await UserModel.findUsersWithPagination(limit, offset);
-
-    res.json({ status: 'success', data: users });
+    res.json({status:'success', message: 'Usuarios obtenidos con exito', data: users});
   } catch (error) {
     res.status(500).json({ status: 'error', message: 'Error al obtener usuarios', error: error.message });
   }
