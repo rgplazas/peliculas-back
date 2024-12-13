@@ -6,9 +6,15 @@ const validateSchema = (schema) => (req, res, next) => {
         schema.parse(req.body); // Valida los datos usando Zod
         next();
     } catch (error) {
-        res.status(400).json({ status: 'error', message: 'Entrada no válida', error: error.errors });
+        console.log(error.errors); // Imprime los detalles del error
+        res.status(400).json({
+            status: 'error',
+            message: `Entrada no válida (${error.errors})`,
+            error: error.errors,
+        });
     }
 };
+
 
 // Configuración del limitador de solicitudes para rutas sensibles
 const loginRateLimiter = rateLimiter({
@@ -22,6 +28,8 @@ const createUserSchema = z.object({
     username: z.string().min(3, 'El nombre de usuario debe tener al menos 3 caracteres'),
     email: z.string().email('Formato de correo electrónico no válido'),
     password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+    nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+    apellido: z.string().min(3, 'El apellido de usuario debe tener al menos 3 caracteres'),
 });
 
 // Esquema de validación para la actualización de un usuario

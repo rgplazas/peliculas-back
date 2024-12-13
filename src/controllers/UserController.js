@@ -31,7 +31,7 @@ const login = async (req, res) => {
 // Creación de un nuevo usuario
 const createUser = async (req, res) => {
   try {
-    const { username, email, password } = createUserSchema.parse(req.body);
+    const { username, email, password, nombre, apellido } = createUserSchema.parse(req.body);
     const existingUsers = await UserModel.checkDuplicateUserOrEmail(username, email);
 
     if (existingUsers.length > 0) {
@@ -39,7 +39,7 @@ const createUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await UserModel.insertUser(username, email, hashedPassword);
+    const result = await UserModel.insertUser(username, email, hashedPassword, nombre, apellido);
 
     res.status(201).json({ status: 'success', message: 'El usuario se registró con éxito', userId: result.insertId });
   } catch (error) {

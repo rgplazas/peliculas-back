@@ -20,10 +20,10 @@ const checkDuplicateUserOrEmail = async (username, email) => {
 };
 
 // Crea un nuevo usuario
-const insertUser = async (username, email, hashedPassword) => {
+const insertUser = async (username, email, hashedPassword, nombre, apellido) => {
   const [result] = await db.query(
-    'INSERT INTO usuarios (username, email, password_hash) VALUES (?, ?, ?)',
-    [username, email, hashedPassword]
+    'INSERT INTO usuarios (username, email, password_hash, nombre, apellido) VALUES (?, ?, ?, ?, ?)',
+    [username, email, hashedPassword, nombre, apellido]
   );
   return result;
 };
